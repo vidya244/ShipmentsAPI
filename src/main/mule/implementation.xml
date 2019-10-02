@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="274a87ef-91ba-4ccf-939c-f1a59570fb36" >
+		<http:request-connection protocol="HTTPS" host="secure.shippingapis.com" />
+	</http:request-config>
+	<flow name="domesticRateCalculator" doc:id="12a26470-e5c3-4d94-a238-27dc7ede0350" >
+		<ee:transform doc:name="JSON to XML" doc:id="d1ef4607-1e08-4399-9d24-54e5e428f57c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+
+	RateV4Request @(USERID: payload.USERID):{
+	Revision: payload.Revision,
+	Package @(ID: payload."Package-ID"):{
+		Service: payload.Service,
+		ZipOrigination: payload.ZipOrigination,
+		ZipDestination: payload.ZipDestination,
+		Pounds: payload.Pounds,
+		Ounces: payload.Ounces,
+		Container: payload.Container,
+		Width: payload.Width,
+		Height: payload.Height,
+		Girth: payload.Girth
+	}	
+	}
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="b3327d31-a59f-45e7-a5fd-070e87aab7db" path="/shippingapi.dll" config-ref="HTTP_Request_configuration">
+			<http:query-params ><![CDATA[#[output application/xml
+---
+{
+	"XML" : payload.^raw as String,
+	"API" : "RateV4"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="XML to JSON" doc:id="6b9ff15a-484a-406d-80a8-95c377a2adac">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json 
+var root = payload.RateV4Response.Package
+---
+{
+	Shipping_Details : {
+		origin_Zip : root.ZipOrigination,
+		Destination_Zip :root.ZipDestination,
+		Pounds: root.Pounds,
+		Ounces: root.Ounces 
+	},
+	Mailing_Services: {
+		Type: root.Postage.MailService replace "&lt;sup&gt;&#8482;&lt;/sup&gt;" with " ",
+		Price: root.Postage.Rate
+	},
+	Special_Services: root.Postage.SpecialServices mapObject (val,ind) ->{
+		Service_name: val.ServiceName 
+			replace "&lt;sup&gt;&#8482;&lt;/sup&gt;" with "-" replace "&lt;sup&gt;&#174;&lt;/sup&gt;" with "-",		
+		Price: val.Price
+	}
+}	
+	
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="addressVerify" doc:id="57970349-9747-41ed-9517-c2c050676605" >
+		<ee:transform doc:name="JSON to XML" doc:id="f72e13c3-70f0-46e0-a81f-2ae822ee8dcc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	AddressValidateRequest @(USERID: payload.USERID) : {
+		
+		Revision: payload.Revision,
+		Address @(ID: payload.AddressID): {
+			Address1 : payload.Address1,
+			Address2: payload.Address2,
+			City: payload.City,
+			State : payload.State,
+			Zip5: payload.Zip5,
+			Zip4: payload.Zip4
+		}		
+	}
+}
+
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="17bd978f-12f7-4252-9584-6ccbb090c554" config-ref="HTTP_Request_configuration" path="/shippingapi.dll">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	XML : payload.^raw as String,
+	API : "Verify"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="XML to JSON" doc:id="68dab98a-5b87-4a2f-89e0-310dc03c0113" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json 
+var root = payload.AddressValidateResponse.Address 
+---
+{
+	Address_Details : {
+		Suite : root.Address1,
+		Address_Line1 :root.Address2,
+		City: root.City,
+		City_Abbreviation: root.CityAbbreviation,
+		State:root.State,
+		Zip4: root.Zip4,
+		Zip5: root.Zip5,
+		Delivery_Point: root.DeliveryPoint
+	}
+}	
+	
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

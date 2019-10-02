@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="addressXML" format="xml">
+      <types:example format="xml" element="AddressValidateResponse" location="examples/address.xml"/>
+    </types:type>
+    <types:type name="addressJSON" format="json">
+      <types:shape format="weave" example="examples/addressJSON-2.json"><![CDATA[%dw 2.0
+
+type addressJSON = {|
+  USERID: String, 
+  Revision: String, 
+  AddressID: String, 
+  Address1: String, 
+  Address2: String, 
+  City: String, 
+  State: String, 
+  Zip5: String, 
+  Zip4: String
+|} {"example": "{\"USERID\":\"797OPENL6489\",\"Revision\":\"1\",\"AddressID\":\"0\",\"Address1\":\"SUITE K\",\"Address2\":\"29851 Aventura\",\"City\":\"RANCHO SANTA MARGARITA\",\"State\":\"CA\",\"Zip5\":\"92688\",\"Zip4\":\"2014\"}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="RateBodyJSON" format="json">
+      <types:shape format="weave" example="examples/RateBodyJSON-2.json"><![CDATA[%dw 2.0
+
+type RateBodyJSON = {|
+  USERID: String, 
+  Revision: String, 
+  Service: String, 
+  "Package-ID": String, 
+  ZipOrigination: String, 
+  ZipDestination: String, 
+  Pounds: String, 
+  Ounces: String, 
+  Container: String, 
+  Width: String, 
+  Height: String, 
+  Girth: String, 
+  Machinable: String
+|} {"example": "{\"USERID\":\"797OPENL6489\",\"Revision\":\"2\",\"Service\":\"Priority\",\"Package-ID\":\"2ND\",\"ZipOrigination\":\"33420\",\"ZipDestination\":\"54174\",\"Pounds\":\"0\",\"Ounces\":\"2\",\"Container\":\" \",\"Width\":\"12\",\"Height\":\"14\",\"Girth\":\"16\",\"Machinable\":\"false\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#f72e13c3-70f0-46e0-a81f-2ae822ee8dcc">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="addressJSON"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#d1ef4607-1e08-4399-9d24-54e5e428f57c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="RateBodyJSON"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

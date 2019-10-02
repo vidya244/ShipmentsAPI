@@ -1,0 +1,40 @@
+{
+  "configs": [
+    "implementation.xml",
+    "interface.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:shipmentsapi-v:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.2.1",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "api/errorResponses/trait.raml",
+        "api/Examples/RateBody.raml",
+        "api/Examples/RateResponse.raml",
+        "api/Examples/verifyBody.raml",
+        "api/Examples/verifyResponse.raml",
+        "api/shipmentsapi-v.raml",
+        "application-types.xml",
+        "examples/address.xml",
+        "examples/addressJSON-1.json",
+        "examples/addressJSON-2.json",
+        "examples/addressJSON.json",
+        "examples/RateBodyJSON-1.json",
+        "examples/RateBodyJSON-2.json",
+        "examples/RateBodyJSON.json",
+        "implementation.xml",
+        "interface.xml",
+        "log4j2.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

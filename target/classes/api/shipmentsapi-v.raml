@@ -1,0 +1,38 @@
+#%RAML 1.0
+baseUri: https://anypoint.mulesoft.com/mocking/api/v1/links/a56bf9ec-2ae1-4992-9e42-de700e34ae39/ # 
+title: ShipmentsAPI-v
+
+traits:
+  errorResponses: !include errorResponses/trait.raml
+
+/domesticPrice:
+  post:
+    is:
+    - errorResponses
+    body:
+      application/json:
+        example:
+          !include Examples/RateBody.raml
+
+    responses:
+      200:
+        body:
+          application/json:
+            examples: !include Examples/RateResponse.raml
+
+/addressVerify:
+  post:
+    is:
+    - errorResponses
+    body:
+      application/json:
+        example:
+          !include Examples/verifyBody.raml
+
+    responses:
+      200:
+        body:
+          application/json:
+            examples: !include Examples/verifyResponse.raml
+        
+  
